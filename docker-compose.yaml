@@ -8,21 +8,42 @@ networks:
         - subnet: fd00:db8:a::/64
           gateway: fd00:db8:a::1
 services:
-  mint:
-    image: cashubtc/nutshell:0.15.3
-    container_name: mint
+  # mint:
+  #   image: cashubtc/nutshell:0.15.3
+  #   container_name: mint
+  #   ports:
+  #     - "3338"
+  #   networks:
+  #     nostr:
+  #   environment:
+  #     - MINT_BACKEND_BOLT11_SAT=FakeWallet
+  #     - MINT_LISTEN_HOST=0.0.0.0
+  #     - MINT_LISTEN_PORT=3338
+  #     - MINT_PRIVATE_KEY=TEST_PRIVATE_KEY
+  #     - MINT_INFO_DESCRIPTION=This Cashu test mint has no public IP address and can only be reached via NWS powered by Nostr
+  #     - MINT_INFO_NAME=Cashu NWS mint
+  #   command: ["poetry", "run", "mint"]
+  chamberlain:
+    build: ../chamberlain
+    container_name: chamberlain
+    command:
+      [
+        "--network=regtest",
+        "--bitcoind-rpc-url=http://host.docker.internal:18443",
+        "--bitcoind-rpc-user=polaruser",
+        "--bitcoind-rpc-password=polarpass",
+        "--mint-url=http://chamberlain:3338",
+        "--http-host=0.0.0.0",
+        "--rpc-host=0.0.0.0",
+        "--log-level=debug"
+      ]
     ports:
       - "3338"
+      - "3339"
     networks:
       nostr:
-    environment:
-      - MINT_BACKEND_BOLT11_SAT=FakeWallet
-      - MINT_LISTEN_HOST=0.0.0.0
-      - MINT_LISTEN_PORT=3338
-      - MINT_PRIVATE_KEY=TEST_PRIVATE_KEY
-      - MINT_INFO_DESCRIPTION=This Cashu test mint has no public IP address and can only be reached via NWS powered by Nostr
-      - MINT_INFO_NAME=Cashu NWS mint
-    command: ["poetry", "run", "mint"]
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
   exit:
     build:
       context: .
@@ -32,19 +53,26 @@ services:
       nostr:
     environment:
       - NOSTR_RELAYS=ws://nostr-relay:8080
-      - NOSTR_PRIVATE_KEY=
-      - BACKEND_HOST=mint:3338
+      - NOSTR_PRIVATE_KEY=39f316139bdaffb708f48c803d7cc81eadb9b472860f9d323fdb79d68f323289
+      - BACKEND_HOST=chamberlain:3339
   exit-https:
     build:
       context: .
       dockerfile: cmd/exit/Dockerfile
     container_name: exit-https
-    command: ["./exit", "--port", "4443", "--target", "http://mint:3338"]
+    command:
+      [
+        "./exit",
+        "--port",
+        "4443",
+        "--target",
+        "http://chamberlain:3338"
+      ]
     networks:
       nostr:
     environment:
       - NOSTR_RELAYS=ws://nostr-relay:8080
-      - NOSTR_PRIVATE_KEY=
+      - NOSTR_PRIVATE_KEY=1a29483cafa686a08eda89e56dd9d1fc278aedacbbc385497bce00ec33d0d094
       - BACKEND_HOST=:4443
   entry:
     build:
@@ -66,6 +94,8 @@ services:
       nostr:
     restart: always
     volumes:
-      - ./nostr/data:/usr/src/app/db:Z
-      - ./nostr/config/config.toml:/usr/src/app/config.toml:ro,Z
-    user: 100:100
+      - nostr_data:/usr/src/app/db
+    user: 1000:1000
+
+volumes:
+  nostr_data:
