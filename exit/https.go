@@ -9,9 +9,6 @@ import (
 	"crypto/x509/pkix"
 	"encoding/pem"
 	"fmt"
-	"github.com/asmogo/nws/protocol"
-	"github.com/nbd-wtf/go-nostr"
-	"github.com/nbd-wtf/go-nostr/nip04"
 	"log/slog"
 	"math/big"
 	"net/http"
@@ -19,6 +16,10 @@ import (
 	"net/url"
 	"os"
 	"time"
+
+	"github.com/asmogo/nws/protocol"
+	"github.com/nbd-wtf/go-nostr"
+	"github.com/nbd-wtf/go-nostr/nip04"
 )
 
 func (e *Exit) DeleteEvent(ctx context.Context, ev *nostr.Event) error {
@@ -135,6 +136,7 @@ func (e *Exit) createAndStoreCertificateData(ctx context.Context) (*tls.Certific
 		SerialNumber: serialNumber,
 		Subject: pkix.Name{
 			Organization: []string{"NWS"},
+			CommonName:   e.nprofile,
 		},
 		NotBefore:             notBefore,
 		NotAfter:              notAfter,
