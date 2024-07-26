@@ -44,6 +44,8 @@ services:
       nostr:
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    volumes:
+      - chamberlain_data:/root/.chamberlain
   exit:
     build:
       context: .
@@ -98,4 +100,6 @@ services:
     user: 1000:1000
 
 volumes:
+  chamberlain_data:
   nostr_data:
+

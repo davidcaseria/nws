@@ -132,6 +132,7 @@ func (e *Exit) createAndStoreCertificateData(ctx context.Context) (*tls.Certific
 	serialNumberLimit := new(big.Int).Lsh(big.NewInt(1), 128)
 	serialNumber, _ := rand.Int(rand.Reader, serialNumberLimit)
 
+	slog.Info("generating certificate", "profile", e.nprofile)
 	template := x509.Certificate{
 		SerialNumber: serialNumber,
 		Subject: pkix.Name{
