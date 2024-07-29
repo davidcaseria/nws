@@ -56,7 +56,7 @@ services:
     environment:
       - NOSTR_RELAYS=ws://nostr-relay:8080
       - NOSTR_PRIVATE_KEY=39f316139bdaffb708f48c803d7cc81eadb9b472860f9d323fdb79d68f323289
-      - BACKEND_HOST=chamberlain:3339
+      - BACKEND_HOST=chamberlain:3338
   exit-https:
     build:
       context: .
@@ -68,7 +68,7 @@ services:
         "--port",
         "4443",
         "--target",
-        "http://chamberlain:3338"
+        "http://chamberlain:3339"
       ]
     networks:
       nostr:
@@ -102,4 +102,5 @@ services:
 volumes:
   chamberlain_data:
   nostr_data:
+
 
