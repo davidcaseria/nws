@@ -1,0 +1,22 @@
+[req]
+default_bits       = 4096
+distinguished_name = req_distinguished_name
+req_extensions     = req_ext
+x509_extensions    = v3_req
+prompt             = no
+
+[req_distinguished_name]
+C  = US
+ST = State
+L  = City
+O  = Organization
+OU = Organizational Unit
+
+[req_ext]
+subjectAltName = @alt_names
+
+[v3_req]
+subjectAltName = @alt_names
+
+[alt_names]
+DNS.1 = etpjkbpfdpnn6t3i5lp6ar31f4t3gc1o60.rbhuu9lv05r7pctqamd1nhjs2elldrish7ab8lehi4iduiej4qa0.nostr

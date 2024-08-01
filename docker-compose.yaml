@@ -35,6 +35,8 @@ services:
         "--mint-url=http://chamberlain:3338",
         "--http-host=0.0.0.0",
         "--rpc-host=0.0.0.0",
+        "--rpc-tls-cert=/root/server-cert.pem",
+        "--rpc-tls-key=/root/server-key.pem",
         "--log-level=debug"
       ]
     ports:
@@ -46,6 +48,8 @@ services:
       - "host.docker.internal:host-gateway"
     volumes:
       - chamberlain_data:/root/.chamberlain
+      - ./server-cert.pem:/root/server-cert.pem
+      - ./server-key.pem:/root/server-key.pem
   exit:
     build:
       context: .
@@ -56,7 +60,7 @@ services:
     environment:
       - NOSTR_RELAYS=ws://nostr-relay:8080
       - NOSTR_PRIVATE_KEY=39f316139bdaffb708f48c803d7cc81eadb9b472860f9d323fdb79d68f323289
-      - BACKEND_HOST=chamberlain:3338
+      - BACKEND_HOST=chamberlain:3339
     depends_on:
       - nostr
   exit-https:
@@ -70,7 +74,7 @@ services:
         "--port",
         "4443",
         "--target",
-        "http://chamberlain:3339"
+        "http://chamberlain:3338"
       ]
     networks:
       nostr:
