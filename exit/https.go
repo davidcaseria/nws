@@ -22,30 +22,6 @@ import (
 	"github.com/nbd-wtf/go-nostr/nip04"
 )
 
-func (e *Exit) DeleteEvent(ctx context.Context, ev *nostr.Event) error {
-	for _, responseRelay := range e.config.NostrRelays {
-		var relay *nostr.Relay
-		relay, err := e.pool.EnsureRelay(responseRelay)
-		if err != nil {
-			return err
-		}
-		event := nostr.Event{
-			CreatedAt: nostr.Now(),
-			PubKey:    e.publicKey,
-			Kind:      nostr.KindDeletion,
-			Tags: nostr.Tags{
-				nostr.Tag{"e", ev.ID},
-			},
-		}
-		err = event.Sign(e.config.NostrPrivateKey)
-		err = relay.Publish(ctx, event)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
 func (e *Exit) StartReverseProxy(httpTarget string, port int32) error {
 	ctx := context.Background()
 	ev := e.pool.QuerySingle(ctx, e.config.NostrRelays, nostr.Filter{
@@ -131,6 +107,7 @@ func (e *Exit) createAndStoreCertificateData(ctx context.Context) (*tls.Certific
 	notAfter := notBefore.Add(10 * 365 * 24 * time.Hour)
 	serialNumberLimit := new(big.Int).Lsh(big.NewInt(1), 128)
 	serialNumber, _ := rand.Int(rand.Reader, serialNumberLimit)
+	domain, _ := e.getDomain()
 
 	domain, _ := e.getDomain()
 	slog.Info("generating certificate", "profile", e.nprofile)
